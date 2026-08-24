@@ -102,7 +102,7 @@ Workflow usado:
 
 - `.github/workflows/publish_alfameta_ghcr.yml`
 - GitHub Actions run:
-  `https://github.com/stefan-alfameta/evolution-go/actions/runs/32714747688`
+  `https://github.com/stefan-alfameta/evolution-go/actions/runs/32725487727`
 - Resultado: `success`
 
 Imagem publicada:
@@ -113,7 +113,7 @@ Imagem publicada:
 
 Digest validado:
 
-- `ghcr.io/stefan-alfameta/evolution-go@sha256:da83767088aabc4d0ab5fc05630ab28cbdaacdd5fd614125877567e7bac39852`
+- `ghcr.io/stefan-alfameta/evolution-go@sha256:a4a94daae5cbbae950fcdb31157c6e21c98906099beff4568a91a3fa3ab70266`
 
 Validacao da imagem publicada:
 
@@ -133,10 +133,12 @@ Deploy aplicado em `2026-08-24` na Contabo.
 - Imagem anterior: `evoapicloud/evolution-go:0.7.2`.
 - Imagem atual: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`.
 - Digest em producao:
-  `sha256:da83767088aabc4d0ab5fc05630ab28cbdaacdd5fd614125877567e7bac39852`.
+  `sha256:a4a94daae5cbbae950fcdb31157c6e21c98906099beff4568a91a3fa3ab70266`.
 - Backups criados na VPS:
-  `/srv/apps/evolution-go/stack.yml.bak-20260824-120935` e
-  `/srv/apps/evolution-go/.env.bak-20260824-120935`.
+  `/srv/apps/evolution-go/stack.yml.bak-20260824-120935`,
+  `/srv/apps/evolution-go/.env.bak-20260824-120935`,
+  `/srv/apps/evolution-go/stack.yml.bak-20260824-141120` e
+  `/srv/apps/evolution-go/.env.bak-20260824-141120`.
 
 Validacao apos deploy:
 
@@ -147,7 +149,32 @@ Validacao apos deploy:
 - O HTML do manager referencia `index-alfameta.js`.
 - O bundle do manager contem `Alfameta`.
 
+## Testes automatizados de producao
+
+Smoke test de leitura:
+
+- Script operacional: `scripts/evolution_go_smoke.py` na pasta `api-go`.
+- Resultado: 18 verificacoes `PASS`, 2 `SKIP`.
+- Cobertura validada: `/server/ok`, manager, Swagger, licenca, instancia,
+  logs, status, configuracoes avancadas, privacidade, blocklist, grupos,
+  labels, newsletters e contatos.
+- Inventario Swagger: 88 paths e 91 operacoes.
+
+Teste real dos botoes interativos:
+
+- Script operacional: `scripts/evolution_go_interactive_send_tests.py` na pasta
+  `api-go`.
+- Resultado: 12 envios `PASS`.
+- Rotas validadas: `/send/button`, `/send/list` e `/send/carousel`.
+- Casos validados: reply 1 botao, reply 3 botoes, CTA copy, CTA URL, CTA call,
+  Pix sozinho, CTAs agrupados, lista com secoes, carrossel reply, carrossel URL,
+  carrossel call e carrossel copy.
+
 ## Pendencias pos-producao
 
-- Testar manualmente: login no manager, envio de texto, check-user, download de
-  midia, block/unblock, reconnect e criacao de grupo.
+- Criar ambiente de homologacao para rotas destrutivas ou de mudanca de estado:
+  delete/logout/disconnect, block/unblock, criacao/alteracao de grupo, envio de
+  status e alteracao de perfil.
+- Testar manualmente renderizacao visual dos botoes nos clientes WhatsApp
+  Android, iOS e Web. A API retornou sucesso e messageId para todos os casos,
+  mas a renderizacao final depende do cliente WhatsApp.

@@ -56,6 +56,8 @@ Validacoes executadas:
 - Producao `https://api-ago.alfameta.agr.br/server/ok`: passou.
 - Manager `https://api-ago.alfameta.agr.br/manager`: serviu
   `Alfameta`.
+- Smoke test operacional: 18 verificacoes passaram.
+- Teste real dos botoes interativos: 12 envios passaram.
 
 ---
 
