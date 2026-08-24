@@ -1,4 +1,6 @@
-FROM golang:1.25.0-alpine AS build
+FROM golang:1.27.0-alpine AS build
+
+ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN apk update && apk add --no-cache git build-base libjpeg-turbo-dev libwebp-dev
 

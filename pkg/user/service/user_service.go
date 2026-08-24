@@ -242,20 +242,39 @@ func (u *userService) performCheckUser(client *whatsmeow.Client, numbers []strin
 	shouldRetry := false
 
 	for _, item := range resp {
-		// Consultar LID Store para obter LID associado ao JID
 		var lidStr *string
-		if client.Store.LIDs != nil {
-			if lid, err := client.Store.LIDs.GetLIDForPN(context.TODO(), item.JID); err == nil && !lid.IsEmpty() {
-				lidString := fmt.Sprintf("%v", lid)
-				lidStr = &lidString
+
+		jid := item.JID
+		if jid.IsEmpty() {
+			jid = item.PhoneNumber
+		}
+
+		jidString := fmt.Sprintf("%v", jid)
+		if jid.IsEmpty() {
+			jidString = ""
+		}
+
+		if item.JID.Server == types.HiddenUserServer {
+			lidString := fmt.Sprintf("%v", item.JID)
+			lidStr = &lidString
+		} else if client.Store.LIDs != nil {
+			phoneJID := item.PhoneNumber
+			if phoneJID.IsEmpty() && item.JID.Server == types.DefaultUserServer {
+				phoneJID = item.JID
+			}
+			if !phoneJID.IsEmpty() {
+				if lid, err := client.Store.LIDs.GetLIDForPN(context.TODO(), phoneJID); err == nil && !lid.IsEmpty() {
+					lidString := fmt.Sprintf("%v", lid)
+					lidStr = &lidString
+				}
 			}
 		}
 
 		// Determine the RemoteJID to use for messaging
 		remoteJID := item.Query // Default to original query
 		if item.IsIn {
-			// When user exists on WhatsApp, use the JID returned by WhatsApp
-			remoteJID = fmt.Sprintf("%v", item.JID)
+			// Prefer the canonical JID returned by WhatsApp. On modern accounts this may be a LID.
+			remoteJID = jidString
 		} else if formatJid {
 			// If user not found and we used formatJid=true, we should retry with formatJid=false
 			shouldRetry = true
@@ -265,7 +284,7 @@ func (u *userService) performCheckUser(client *whatsmeow.Client, numbers []strin
 			var msg = User{
 				Query:        item.Query,
 				IsInWhatsapp: item.IsIn,
-				JID:          fmt.Sprintf("%v", item.JID),
+				JID:          jidString,
 				RemoteJID:    remoteJID,
 				LID:          lidStr,
 				VerifiedName: item.VerifiedName.Details.GetVerifiedName(),
@@ -275,7 +294,7 @@ func (u *userService) performCheckUser(client *whatsmeow.Client, numbers []strin
 			var msg = User{
 				Query:        item.Query,
 				IsInWhatsapp: item.IsIn,
-				JID:          fmt.Sprintf("%v", item.JID),
+				JID:          jidString,
 				RemoteJID:    remoteJID,
 				LID:          lidStr,
 				VerifiedName: "",
@@ -532,7 +551,8 @@ func (u *userService) SetProfileStatus(data *SetProfileStatusStruct, instance *i
 		return false, err
 	}
 
-	err = client.SetStatusMessage(context.Background(), data.Status)
+	status := data.Status
+	err = client.SetStatusMessage(context.Background(), types.SetStatusInput{Text: &status})
 	if err != nil {
 		return false, err
 	}
