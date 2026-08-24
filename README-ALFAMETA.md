@@ -54,6 +54,9 @@ Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
 10. Alterar `VERSION` para `0.7.2-alfameta.1`, evitando confusao com a release
     oficial `0.7.2` quando a imagem do fork for inspecionada.
 
+11. Publicar imagem propria no GitHub Container Registry, sem usar o namespace
+    oficial `evoapicloud/evolution-go`.
+
 ## Mudancas principais do whatsmeow incorporadas
 
 - Melhor suporte a LID/PN em envio direto, `IsOnWhatsApp`, blocklist e criacao
@@ -93,10 +96,35 @@ Foram encontrados 4 arquivos de teste no projeto:
    `/app/manager/dist/index.html` contem
    `Evolution GO - Alfameta Manager`.
 
+## Publicacao
+
+Workflow usado:
+
+- `.github/workflows/publish_alfameta_ghcr.yml`
+- GitHub Actions run:
+  `https://github.com/stefan-alfameta/evolution-go/actions/runs/32714425678`
+- Resultado: `success`
+
+Imagem publicada:
+
+- `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`
+- `ghcr.io/stefan-alfameta/evolution-go:whatsmeow-20260821`
+- `ghcr.io/stefan-alfameta/evolution-go:alfameta-latest`
+
+Digest validado:
+
+- `ghcr.io/stefan-alfameta/evolution-go@sha256:1324e47715de9ca9de208bc87e67a4ac05f6c3a3252ff93ddecb2fc136860e8c`
+
+Validacao da imagem publicada:
+
+- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`
+  passou sem login local no GHCR.
+- `/app/VERSION` contem `0.7.2-alfameta.1`.
+- `/app/manager/dist/index.html` contem
+  `Evolution GO - Alfameta Manager`.
+
 ## Pendencias antes de producao
 
-- Publicar uma imagem propria do fork, usando um tag que nao conflite com a
-  imagem oficial `evoapicloud/evolution-go`.
 - Validar em ambiente de homologacao ou com uma instancia controlada antes de
   trocar a stack da Contabo.
 - Testar manualmente: login no manager, envio de texto, check-user, download de
