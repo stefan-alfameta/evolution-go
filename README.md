@@ -30,7 +30,7 @@
 
 ## Alfameta fork
 
-Este branch contem o fork Alfameta identificado como `Evolution GO - Alfameta`.
+Este branch contem o fork Alfameta identificado como `Alfameta`.
 As decisoes tecnicas completas ficam em [README-ALFAMETA.md](./README-ALFAMETA.md).
 
 Resumo das decisoes:
@@ -42,20 +42,20 @@ Resumo das decisoes:
 - Ajustar `SetProfileStatus` para a nova assinatura de `SetStatusMessage`.
 - Ajustar `check-user` para tratar melhor LID (`@lid`) e numero telefonico
   (`@s.whatsapp.net`).
-- Identificar o manager como `Evolution GO - Alfameta`, inclusive no topo e na
+- Identificar o manager como `Alfameta`, inclusive no topo e na
   lateral da interface.
 - Publicar a imagem do fork em
-  `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`.
+  `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`.
 - Trocar a producao da Contabo para a imagem do fork em `2026-08-24`.
 
 Validacoes executadas:
 
 - `go test ./...`: passou.
-- `docker build -t evolution-go:0.7.2-alfameta.1 .`: passou.
-- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`: passou.
+- `docker build -t evolution-go:0.7.2-alfameta.2 .`: passou.
+- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`: passou.
 - Producao `https://api-ago.alfameta.agr.br/server/ok`: passou.
 - Manager `https://api-ago.alfameta.agr.br/manager`: serviu
-  `Evolution GO - Alfameta`.
+  `Alfameta`.
 
 ---
 

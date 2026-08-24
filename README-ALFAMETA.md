@@ -1,4 +1,4 @@
-# Evolution GO - Alfameta
+# Alfameta
 
 Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
 `whatsmeow` usada pelo Evolution GO.
@@ -42,8 +42,8 @@ Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
    `whatsmeow` agora troca DMs para LID internamente e adiciona
    `peer_recipient_pn`, entao nao foi necessario duplicar essa regra na API GO.
 
-8. Alterar o branding do manager para `Evolution GO - Alfameta`, incluindo o
-   titulo HTML `Evolution GO - Alfameta Manager`, para identificar claramente o
+8. Alterar o branding do manager para `Alfameta`, incluindo o
+   titulo HTML `Alfameta Manager`, para identificar claramente o
    fork em producao.
 
 9. O manager neste repositorio existe apenas como artefato estatico em
@@ -51,7 +51,7 @@ Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
    branding foi aplicada diretamente no bundle minificado e o arquivo JS foi
    renomeado para cache busting.
 
-10. Alterar `VERSION` para `0.7.2-alfameta.1`, evitando confusao com a release
+10. Alterar `VERSION` para `0.7.2-alfameta.2`, evitando confusao com a release
     oficial `0.7.2` quando a imagem do fork for inspecionada.
 
 11. Publicar imagem propria no GitHub Container Registry, sem usar o namespace
@@ -89,12 +89,12 @@ Foram encontrados 4 arquivos de teste no projeto:
    Resultado: passou antes da alteracao de branding do manager.
 4. `docker build -t evolution-go:whatsmeow-20260821-alfameta .`.
    Resultado: passou apos a alteracao de branding do manager.
-5. `docker build -t evolution-go:0.7.2-alfameta.1 .`.
+5. `docker build -t evolution-go:0.7.2-alfameta.2 .`.
    Resultado: passou apos alterar `VERSION`.
-6. Inspecao da imagem `evolution-go:0.7.2-alfameta.1`.
-   Resultado: `/app/VERSION` contem `0.7.2-alfameta.1` e
+6. Inspecao da imagem `evolution-go:0.7.2-alfameta.2`.
+   Resultado: `/app/VERSION` contem `0.7.2-alfameta.2` e
    `/app/manager/dist/index.html` contem
-   `Evolution GO - Alfameta Manager`.
+   `Alfameta Manager`.
 
 ## Publicacao
 
@@ -107,7 +107,7 @@ Workflow usado:
 
 Imagem publicada:
 
-- `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`
+- `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`
 - `ghcr.io/stefan-alfameta/evolution-go:whatsmeow-20260821`
 - `ghcr.io/stefan-alfameta/evolution-go:alfameta-latest`
 
@@ -117,11 +117,11 @@ Digest validado:
 
 Validacao da imagem publicada:
 
-- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`
+- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`
   passou sem login local no GHCR.
-- `/app/VERSION` contem `0.7.2-alfameta.1`.
+- `/app/VERSION` contem `0.7.2-alfameta.2`.
 - `/app/manager/dist/index.html` contem
-  `Evolution GO - Alfameta Manager`.
+  `Alfameta Manager`.
 
 ## Deploy em producao
 
@@ -131,7 +131,7 @@ Deploy aplicado em `2026-08-24` na Contabo.
 - Servico Swarm: `evolution-go_evolution_go`.
 - URL publica: `https://api-ago.alfameta.agr.br`.
 - Imagem anterior: `evoapicloud/evolution-go:0.7.2`.
-- Imagem atual: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`.
+- Imagem atual: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`.
 - Digest em producao:
   `sha256:da83767088aabc4d0ab5fc05630ab28cbdaacdd5fd614125877567e7bac39852`.
 - Backups criados na VPS:
@@ -144,8 +144,8 @@ Validacao apos deploy:
 - `docker service inspect`: imagem apontando para GHCR com o digest validado.
 - `https://api-ago.alfameta.agr.br/server/ok` respondeu `{"status":"ok"}`.
 - `https://api-ago.alfameta.agr.br/manager` respondeu `200`.
-- O HTML do manager referencia `index-829454eb.js`.
-- O bundle do manager contem `Evolution GO - Alfameta`.
+- O HTML do manager referencia `index-alfameta.js`.
+- O bundle do manager contem `Alfameta`.
 
 ## Pendencias pos-producao
 
