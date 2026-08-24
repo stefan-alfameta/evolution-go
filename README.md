@@ -46,12 +46,16 @@ Resumo das decisoes:
   lateral da interface.
 - Publicar a imagem do fork em
   `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`.
+- Trocar a producao da Contabo para a imagem do fork em `2026-08-24`.
 
 Validacoes executadas:
 
 - `go test ./...`: passou.
 - `docker build -t evolution-go:0.7.2-alfameta.1 .`: passou.
 - `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`: passou.
+- Producao `https://api-ago.alfameta.agr.br/server/ok`: passou.
+- Manager `https://api-ago.alfameta.agr.br/manager`: serviu
+  `Evolution GO - Alfameta`.
 
 ---
 

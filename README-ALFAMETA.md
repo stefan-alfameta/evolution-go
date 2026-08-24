@@ -123,9 +123,31 @@ Validacao da imagem publicada:
 - `/app/manager/dist/index.html` contem
   `Evolution GO - Alfameta Manager`.
 
-## Pendencias antes de producao
+## Deploy em producao
 
-- Validar em ambiente de homologacao ou com uma instancia controlada antes de
-  trocar a stack da Contabo.
+Deploy aplicado em `2026-08-24` na Contabo.
+
+- Stack Swarm: `evolution-go`.
+- Servico Swarm: `evolution-go_evolution_go`.
+- URL publica: `https://api-ago.alfameta.agr.br`.
+- Imagem anterior: `evoapicloud/evolution-go:0.7.2`.
+- Imagem atual: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`.
+- Digest em producao:
+  `sha256:da83767088aabc4d0ab5fc05630ab28cbdaacdd5fd614125877567e7bac39852`.
+- Backups criados na VPS:
+  `/srv/apps/evolution-go/stack.yml.bak-20260824-120935` e
+  `/srv/apps/evolution-go/.env.bak-20260824-120935`.
+
+Validacao apos deploy:
+
+- `docker service ls`: `evolution-go_evolution_go` ficou `1/1`.
+- `docker service inspect`: imagem apontando para GHCR com o digest validado.
+- `https://api-ago.alfameta.agr.br/server/ok` respondeu `{"status":"ok"}`.
+- `https://api-ago.alfameta.agr.br/manager` respondeu `200`.
+- O HTML do manager referencia `index-829454eb.js`.
+- O bundle do manager contem `Evolution GO - Alfameta`.
+
+## Pendencias pos-producao
+
 - Testar manualmente: login no manager, envio de texto, check-user, download de
   midia, block/unblock, reconnect e criacao de grupo.
