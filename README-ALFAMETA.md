@@ -57,6 +57,28 @@ Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
 11. Publicar imagem propria no GitHub Container Registry, sem usar o namespace
     oficial `evoapicloud/evolution-go`.
 
+12. Para resolver a lacuna onde o WhatsApp Web mostra uma midia mas o MCP nao a
+    encontra no cache de webhook, persistir metadados ricos das mensagens
+    recebidas na tabela `messages`: `instance_id`, `chat_jid`, `sender_jid`,
+    `participant_jid`, `chat_name`, `sender_name`, `from_me`, `is_group`,
+    `text`, `media_type`, `media_url`, `mimetype` e `raw_json` sanitizado.
+
+13. Nao persistir base64 grande no JSON bruto. Quando `WEBHOOK_FILES` e MinIO
+    estiverem ativos, a midia deve ficar no bucket e o banco deve guardar apenas
+    a URL em `media_url`.
+
+14. Expor `POST /message/history` para leitura autenticada do historico
+    persistido, com filtros por `message_id`, `chat`, `media_type`, `query`,
+    `limit` e `include_raw`.
+
+15. Manter `POST /chat/history-sync` como recurso best-effort. Ele pode retornar
+    sucesso sem o WhatsApp entregar um evento `HistorySync` com mensagens antigas
+    completas, entao nao deve ser a unica estrategia para recuperar midia.
+
+16. Alterar `VERSION` para `0.7.2-alfameta.4` para publicar/deployar a melhoria
+    de historico e midia sem sobrescrever a tag `0.7.2-alfameta.3` atualmente em
+    producao.
+
 ## Mudancas principais do whatsmeow incorporadas
 
 - Melhor suporte a LID/PN em envio direto, `IsOnWhatsApp`, blocklist e criacao
@@ -95,6 +117,24 @@ Foram encontrados 4 arquivos de teste no projeto:
    Resultado: `/app/VERSION` contem `0.7.2-alfameta.2` e
    `/app/manager/dist/index.html` contem
    `Alfameta Manager`.
+7. Validacao local da melhoria de historico/midia:
+   `go test ./pkg/message/... ./pkg/whatsmeow/service` em container
+   `golang:1.26.0-alpine`.
+   Resultado: passou.
+8. Validacao local do roteador e binario:
+   `go test ./pkg/routes ./cmd/evolution-go` em container
+   `golang:1.26.0-alpine` com `build-base` e `libwebp-dev`.
+   Resultado: passou.
+
+## Publicacao da melhoria de historico/midia
+
+Preparado em `2026-08-24`:
+
+- Tag de imagem: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.4`.
+- Branch de publicacao: `update-whatsmeow-20260821`.
+- Workflow esperado: `.github/workflows/publish_alfameta_ghcr.yml`.
+- Objetivo: disponibilizar `POST /message/history` e persistencia rica de
+  mensagens para o `whatsapp-mcp`.
 
 ## Publicacao
 

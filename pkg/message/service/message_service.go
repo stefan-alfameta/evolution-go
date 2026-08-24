@@ -30,6 +30,7 @@ type MessageService interface {
 	MarkPlayed(data *MarkPlayedStruct, instance *instance_model.Instance) (string, error)
 	DownloadMedia(data *DownloadMediaStruct, instance *instance_model.Instance, request *http.Request) (*dataurl.DataURL, string, error)
 	GetMessageStatus(data *MessageStatusStruct, instance *instance_model.Instance) (*message_model.Message, string, error)
+	FindRecentMessages(data *MessageHistoryStruct, instance *instance_model.Instance) ([]message_model.Message, string, error)
 	DeleteMessageEveryone(data *MessageStruct, instance *instance_model.Instance) (string, string, error)
 	EditMessage(data *EditMessageStruct, instance *instance_model.Instance) (string, string, error)
 }
@@ -75,6 +76,15 @@ type DownloadMediaStruct struct {
 
 type MessageStatusStruct struct {
 	Id string `json:"id"`
+}
+
+type MessageHistoryStruct struct {
+	MessageID  string `json:"message_id"`
+	Chat       string `json:"chat"`
+	MediaType  string `json:"media_type"`
+	Query      string `json:"query"`
+	Limit      int    `json:"limit"`
+	IncludeRaw bool   `json:"include_raw"`
 }
 
 type MessageStruct struct {
@@ -462,6 +472,53 @@ func (m *messageService) GetMessageStatus(data *MessageStatusStruct, instance *i
 	}
 
 	return result, ts.String(), nil
+}
+
+func (m *messageService) FindRecentMessages(data *MessageHistoryStruct, instance *instance_model.Instance) ([]message_model.Message, string, error) {
+	var ts time.Time
+	if data == nil {
+		data = &MessageHistoryStruct{}
+	}
+	mediaType := strings.TrimSpace(strings.ToLower(data.MediaType))
+	if mediaType != "" {
+		allowed := map[string]bool{
+			"image":    true,
+			"video":    true,
+			"audio":    true,
+			"document": true,
+			"sticker":  true,
+		}
+		if !allowed[mediaType] {
+			return nil, "", errors.New("invalid media_type")
+		}
+	}
+	limit := data.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	chat := strings.TrimSpace(data.Chat)
+	if chat != "" {
+		if parsed, ok := utils.ParseJID(chat); ok {
+			chat = utils.CanonicalJID(parsed).String()
+		}
+	}
+
+	messages, err := m.messageRepository.FindRecentMessages(message_repository.MessageHistoryFilter{
+		InstanceID: instance.Id,
+		MessageID:  strings.TrimSpace(data.MessageID),
+		Chat:       chat,
+		MediaType:  mediaType,
+		Query:      strings.TrimSpace(data.Query),
+		Limit:      limit,
+		IncludeRaw: data.IncludeRaw,
+	})
+	if err != nil {
+		return nil, "", err
+	}
+	return messages, ts.String(), nil
 }
 
 func (m *messageService) DeleteMessageEveryone(data *MessageStruct, instance *instance_model.Instance) (string, string, error) {

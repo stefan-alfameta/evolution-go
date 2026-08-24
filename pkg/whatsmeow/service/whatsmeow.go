@@ -144,6 +144,196 @@ func (mycli *MyClient) persistMessageAsync(message message_model.Message) {
 	}()
 }
 
+func (mycli *MyClient) buildPersistedMessage(evt *events.Message, dataMap map[string]interface{}, referral json.RawMessage) message_model.Message {
+	chatJID := canonicalJIDString(evt.Info.Chat)
+	senderJID := canonicalJIDString(evt.Info.Sender)
+	rawJSON := json.RawMessage(nil)
+	if len(dataMap) > 0 {
+		if raw, err := json.Marshal(sanitizeMessageDataForHistory(dataMap)); err == nil {
+			rawJSON = raw
+		}
+	}
+
+	return message_model.Message{
+		MessageID:      evt.Info.ID,
+		Timestamp:      evt.Info.Timestamp.Format("2006-01-02 15:04:05"),
+		Status:         "Received",
+		Source:         evt.Info.Chat.ToNonAD().User,
+		InstanceID:     mycli.Instance.Id,
+		ChatJID:        chatJID,
+		SenderJID:      senderJID,
+		ParticipantJID: senderJID,
+		ChatName:       findStringByNormalizedKey(dataMap, map[string]bool{"chatname": true, "groupname": true, "subject": true, "name": true}),
+		SenderName:     findStringByNormalizedKey(dataMap, map[string]bool{"sendername": true, "participantname": true, "pushname": true, "notifyname": true, "verifiedname": true}),
+		FromMe:         evt.Info.IsFromMe,
+		IsGroup:        strings.HasSuffix(chatJID, "@g.us"),
+		Text:           extractMessageText(evt.Message),
+		MediaType:      extractMessageMediaType(evt.Message),
+		MediaURL:       findStringByNormalizedKey(dataMap, map[string]bool{"mediaurl": true}),
+		Mimetype:       firstNonEmpty(findStringByNormalizedKey(dataMap, map[string]bool{"mimetype": true}), extractMessageMimetype(evt.Message)),
+		RawJSON:        rawJSON,
+		Referral:       referral,
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+func canonicalJIDString(jid types.JID) string {
+	if jid.User == "" {
+		return ""
+	}
+	return utils.CanonicalJID(jid).String()
+}
+
+func sanitizeMessageDataForHistory(value interface{}) interface{} {
+	switch typed := value.(type) {
+	case map[string]interface{}:
+		sanitized := make(map[string]interface{}, len(typed))
+		for key, item := range typed {
+			if strings.EqualFold(key, "base64") {
+				if encoded, ok := item.(string); ok && len(encoded) > 200000 {
+					sanitized[key] = fmt.Sprintf("[omitted %d base64 chars]", len(encoded))
+					continue
+				}
+			}
+			sanitized[key] = sanitizeMessageDataForHistory(item)
+		}
+		return sanitized
+	case []interface{}:
+		sanitized := make([]interface{}, 0, len(typed))
+		for _, item := range typed {
+			sanitized = append(sanitized, sanitizeMessageDataForHistory(item))
+		}
+		return sanitized
+	default:
+		return value
+	}
+}
+
+func findStringByNormalizedKey(value interface{}, keys map[string]bool) string {
+	switch typed := value.(type) {
+	case map[string]interface{}:
+		for key, item := range typed {
+			if keys[normalizeHistoryKey(key)] {
+				if text, ok := item.(string); ok && strings.TrimSpace(text) != "" {
+					return strings.TrimSpace(text)
+				}
+			}
+		}
+		for _, item := range typed {
+			if found := findStringByNormalizedKey(item, keys); found != "" {
+				return found
+			}
+		}
+	case []interface{}:
+		for _, item := range typed {
+			if found := findStringByNormalizedKey(item, keys); found != "" {
+				return found
+			}
+		}
+	}
+	return ""
+}
+
+func normalizeHistoryKey(value string) string {
+	var builder strings.Builder
+	for _, r := range strings.ToLower(value) {
+		if r >= 'a' && r <= 'z' || r >= '0' && r <= '9' {
+			builder.WriteRune(r)
+		}
+	}
+	return builder.String()
+}
+
+func extractMessageText(message *waE2E.Message) string {
+	if message == nil {
+		return ""
+	}
+	if text := strings.TrimSpace(message.GetConversation()); text != "" {
+		return text
+	}
+	if ext := message.GetExtendedTextMessage(); ext != nil {
+		return strings.TrimSpace(ext.GetText())
+	}
+	if img := message.GetImageMessage(); img != nil {
+		return strings.TrimSpace(img.GetCaption())
+	}
+	if video := message.GetVideoMessage(); video != nil {
+		return strings.TrimSpace(video.GetCaption())
+	}
+	if document := message.GetDocumentMessage(); document != nil {
+		if text := strings.TrimSpace(document.GetCaption()); text != "" {
+			return text
+		}
+		return strings.TrimSpace(document.GetFileName())
+	}
+	return ""
+}
+
+func extractMessageMediaType(message *waE2E.Message) string {
+	if message == nil {
+		return ""
+	}
+	switch {
+	case message.GetImageMessage() != nil:
+		return "image"
+	case message.GetVideoMessage() != nil:
+		return "video"
+	case message.GetAudioMessage() != nil:
+		return "audio"
+	case message.GetDocumentMessage() != nil:
+		return "document"
+	case message.GetStickerMessage() != nil:
+		return "sticker"
+	default:
+		return ""
+	}
+}
+
+func extractMessageMimetype(message *waE2E.Message) string {
+	if message == nil {
+		return ""
+	}
+	if img := message.GetImageMessage(); img != nil {
+		if mimetype := img.GetMimetype(); mimetype != "" {
+			return mimetype
+		}
+		return "image/jpeg"
+	}
+	if video := message.GetVideoMessage(); video != nil {
+		if mimetype := video.GetMimetype(); mimetype != "" {
+			return mimetype
+		}
+		return "video/mp4"
+	}
+	if audio := message.GetAudioMessage(); audio != nil {
+		if mimetype := audio.GetMimetype(); mimetype != "" {
+			return mimetype
+		}
+		return "audio/ogg"
+	}
+	if document := message.GetDocumentMessage(); document != nil {
+		if mimetype := document.GetMimetype(); mimetype != "" {
+			return mimetype
+		}
+		return "application/octet-stream"
+	}
+	if sticker := message.GetStickerMessage(); sticker != nil {
+		if mimetype := sticker.GetMimetype(); mimetype != "" {
+			return mimetype
+		}
+		return "image/webp"
+	}
+	return ""
+}
+
 type ClientData struct {
 	Instance      *instance_model.Instance
 	Subscriptions []string
@@ -1626,15 +1816,7 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 		postMap["data"] = dataMap
 
 		if mycli.config.DatabaseSaveMessages {
-			message := message_model.Message{
-				MessageID: evt.Info.ID,
-				Timestamp: evt.Info.Timestamp.Format("2006-01-02 15:04:05"),
-				Status:    "Received",
-				Source:    evt.Info.Chat.ToNonAD().User,
-				Referral:  referral,
-			}
-
-			mycli.persistMessageAsync(message)
+			mycli.persistMessageAsync(mycli.buildPersistedMessage(evt, dataMap, referral))
 		}
 
 		// ===== BUTTON CLICK EVENT DETECTION =====

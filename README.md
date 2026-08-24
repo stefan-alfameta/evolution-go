@@ -45,8 +45,14 @@ Resumo das decisoes:
 - Identificar o manager como `Alfameta`, inclusive no topo e na
   lateral da interface.
 - Publicar a imagem do fork em
-  `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.2`.
+  `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.4`.
 - Trocar a producao da Contabo para a imagem do fork em `2026-08-24`.
+- Decisao de historico/midia em `2026-08-24`: persistir metadados ricos de
+  mensagens recebidas na tabela `messages` e expor `POST /message/history` para
+  o MCP buscar imagem, audio, video, documento e figurinha sem depender apenas
+  do webhook.
+- Nao salvar base64 grande no banco; midia deve ficar em MinIO e ser
+  referenciada por `media_url`.
 
 Validacoes executadas:
 
@@ -58,6 +64,13 @@ Validacoes executadas:
   `Alfameta`.
 - Smoke test operacional: 18 verificacoes passaram.
 - Teste real dos botoes interativos: 12 envios passaram.
+- Validacao local da melhoria de historico: `go test ./pkg/message/...
+  ./pkg/whatsmeow/service` passou em container `golang:1.26.0-alpine`.
+- Validacao local do roteador/binario: `go test ./pkg/routes
+  ./cmd/evolution-go` passou em container `golang:1.26.0-alpine` com
+  `build-base` e `libwebp-dev`.
+- Versao preparada para deploy da melhoria de historico/midia:
+  `0.7.2-alfameta.4`.
 
 ---
 

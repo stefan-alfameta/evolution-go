@@ -15,6 +15,7 @@ type MessageHandler interface {
 	MarkPlayed(ctx *gin.Context)
 	DownloadMedia(ctx *gin.Context)
 	GetMessageStatus(ctx *gin.Context)
+	FindRecentMessages(ctx *gin.Context)
 	DeleteMessageEveryone(ctx *gin.Context)
 	EditMessage(ctx *gin.Context)
 }
@@ -300,6 +301,48 @@ func (m *messageHandler) GetMessageStatus(ctx *gin.Context) {
 
 	responseData := gin.H{
 		"result":    message,
+		"timestamp": ts,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "success", "data": responseData})
+}
+
+// FindRecentMessages gets recent messages persisted by Evolution Go
+// @Summary Get recent persisted messages
+// @Description Get recent persisted messages with optional chat, text and media filters
+// @Tags Message
+// @Accept json
+// @Produce json
+// @Param message body message_service.MessageHistoryStruct true "Message history filters"
+// @Success 200 {object} gin.H "success"
+// @Failure 400 {object} gin.H "Error on validation"
+// @Failure 500 {object} gin.H "Internal server error"
+// @Router /message/history [post]
+func (m *messageHandler) FindRecentMessages(ctx *gin.Context) {
+	getInstance := ctx.MustGet("instance")
+
+	instance, ok := getInstance.(*instance_model.Instance)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "instance not found"})
+		return
+	}
+
+	var data *message_service.MessageHistoryStruct
+	err := ctx.ShouldBindBodyWithJSON(&data)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	messages, ts, err := m.messageService.FindRecentMessages(data, instance)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	responseData := gin.H{
+		"messages":  messages,
+		"count":     len(messages),
 		"timestamp": ts,
 	}
 
