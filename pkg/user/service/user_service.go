@@ -147,6 +147,14 @@ func (u *userService) ensureClientConnected(instanceId string) (*whatsmeow.Clien
 	return client, nil
 }
 
+func parseUserJID(value string) (types.JID, bool) {
+	jid, ok := utils.ParseJID(value)
+	if !ok {
+		return types.EmptyJID, false
+	}
+	return utils.CanonicalJID(jid), true
+}
+
 func (u *userService) GetUser(data *CheckUserStruct, instance *instance_model.Instance) (*UserCollection, error) {
 	client, err := u.ensureClientConnected(instance.Id)
 	if err != nil {
@@ -155,7 +163,7 @@ func (u *userService) GetUser(data *CheckUserStruct, instance *instance_model.In
 
 	var jids []types.JID
 	for _, arg := range data.Number {
-		jid, ok := utils.ParseJID(arg)
+		jid, ok := parseUserJID(arg)
 		if !ok {
 			return nil, errors.New("invalid phone number")
 		}
@@ -350,7 +358,7 @@ func (u *userService) GetAvatar(data *GetAvatarStruct, instance *instance_model.
 		return nil, errors.New("client is not logged in to WhatsApp")
 	}
 
-	jid, ok := utils.ParseJID(data.Number)
+	jid, ok := parseUserJID(data.Number)
 	if !ok {
 		return nil, errors.New("invalid phone number")
 	}
@@ -458,7 +466,7 @@ func (u *userService) BlockContact(data *BlockStruct, instance *instance_model.I
 		return nil, err
 	}
 
-	jid, ok := utils.ParseJID(data.Number)
+	jid, ok := parseUserJID(data.Number)
 	if !ok {
 		return nil, errors.New("invalid phone number")
 	}
@@ -477,7 +485,7 @@ func (u *userService) UnlockContact(data *BlockStruct, instance *instance_model.
 		return nil, err
 	}
 
-	jid, ok := utils.ParseJID(data.Number)
+	jid, ok := parseUserJID(data.Number)
 	if !ok {
 		return nil, errors.New("invalid phone number")
 	}
