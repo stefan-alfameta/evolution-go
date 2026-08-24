@@ -13,10 +13,10 @@ type Message struct {
 	Timestamp      string          `json:"timestamp"`
 	Status         string          `json:"status"`
 	Source         string          `json:"source"`
-	InstanceID     string          `json:"instance_id,omitempty" gorm:"index"`
-	ChatJID        string          `json:"chat_jid,omitempty" gorm:"index"`
-	SenderJID      string          `json:"sender_jid,omitempty" gorm:"index"`
-	ParticipantJID string          `json:"participant_jid,omitempty" gorm:"index"`
+	InstanceID     string          `json:"instance_id,omitempty" gorm:"column:instance_id;index"`
+	ChatJID        string          `json:"chat_jid,omitempty" gorm:"column:chat_jid;index"`
+	SenderJID      string          `json:"sender_jid,omitempty" gorm:"column:sender_jid;index"`
+	ParticipantJID string          `json:"participant_jid,omitempty" gorm:"column:participant_jid;index"`
 	ChatName       string          `json:"chat_name,omitempty"`
 	SenderName     string          `json:"sender_name,omitempty"`
 	FromMe         bool            `json:"from_me"`

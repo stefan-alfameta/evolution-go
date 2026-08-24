@@ -75,9 +75,10 @@ Notas do fork Alfameta criado em 2026-08-24 para atualizar a base do
     sucesso sem o WhatsApp entregar um evento `HistorySync` com mensagens antigas
     completas, entao nao deve ser a unica estrategia para recuperar midia.
 
-16. Alterar `VERSION` para `0.7.2-alfameta.4` para publicar/deployar a melhoria
-    de historico e midia sem sobrescrever a tag `0.7.2-alfameta.3` atualmente em
-    producao.
+16. Alterar `VERSION` para `0.7.2-alfameta.5` para publicar/deployar a melhoria
+    de historico e midia sem sobrescrever a tag `0.7.2-alfameta.3` usada antes
+    desse deploy. A tag `0.7.2-alfameta.4` foi descartada por erro de coluna
+    GORM (`chat_j_id` vs `chat_jid`) detectado em producao.
 
 ## Mudancas principais do whatsmeow incorporadas
 
@@ -130,7 +131,7 @@ Foram encontrados 4 arquivos de teste no projeto:
 
 Preparado em `2026-08-24`:
 
-- Tag de imagem: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.4`.
+- Tag de imagem: `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.5`.
 - Branch de publicacao: `update-whatsmeow-20260821`.
 - Workflow esperado: `.github/workflows/publish_alfameta_ghcr.yml`.
 - Objetivo: disponibilizar `POST /message/history` e persistencia rica de
