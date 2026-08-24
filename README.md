@@ -28,6 +28,33 @@
 
 ---
 
+## Alfameta fork
+
+Este branch contem o fork Alfameta identificado como `Evolution GO - Alfameta`.
+As decisoes tecnicas completas ficam em [README-ALFAMETA.md](./README-ALFAMETA.md).
+
+Resumo das decisoes:
+
+- Atualizar `go.mau.fi/whatsmeow` para
+  `v0.0.0-20260821141805-33cfac511629`.
+- Subir o projeto para `go 1.26.0` e o build Docker para
+  `golang:1.27.0-alpine`.
+- Ajustar `SetProfileStatus` para a nova assinatura de `SetStatusMessage`.
+- Ajustar `check-user` para tratar melhor LID (`@lid`) e numero telefonico
+  (`@s.whatsapp.net`).
+- Identificar o manager como `Evolution GO - Alfameta`, inclusive no topo e na
+  lateral da interface.
+- Publicar a imagem do fork em
+  `ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`.
+
+Validacoes executadas:
+
+- `go test ./...`: passou.
+- `docker build -t evolution-go:0.7.2-alfameta.1 .`: passou.
+- `docker pull ghcr.io/stefan-alfameta/evolution-go:0.7.2-alfameta.1`: passou.
+
+---
+
 ## About
 
 **Evolution Go** is a high-performance WhatsApp API built in Go. Part of the Evolution Foundation ecosystem, it provides a robust, lightweight solution for WhatsApp integration using the [whatsmeow](https://github.com/tulir/whatsmeow) library.

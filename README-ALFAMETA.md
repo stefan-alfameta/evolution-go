@@ -102,7 +102,7 @@ Workflow usado:
 
 - `.github/workflows/publish_alfameta_ghcr.yml`
 - GitHub Actions run:
-  `https://github.com/stefan-alfameta/evolution-go/actions/runs/32714425678`
+  `https://github.com/stefan-alfameta/evolution-go/actions/runs/32714747688`
 - Resultado: `success`
 
 Imagem publicada:
@@ -113,7 +113,7 @@ Imagem publicada:
 
 Digest validado:
 
-- `ghcr.io/stefan-alfameta/evolution-go@sha256:1324e47715de9ca9de208bc87e67a4ac05f6c3a3252ff93ddecb2fc136860e8c`
+- `ghcr.io/stefan-alfameta/evolution-go@sha256:da83767088aabc4d0ab5fc05630ab28cbdaacdd5fd614125877567e7bac39852`
 
 Validacao da imagem publicada:
 
